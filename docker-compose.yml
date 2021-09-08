@@ -1,0 +1,44 @@
+version: "3.7"
+
+volumes:
+  geo:
+
+services:
+  nginx:
+    image: jmarkin/full_nginx:${VERSION:-latest}
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - target: 80
+        published: 80
+        protocol: tcp
+        mode: host
+      - target: 443
+        published: 443
+        protocol: tcp
+        mode: host
+    volumes:
+      - ${NGINX_PATH:-/srv/nginx}:/etc/nginx/conf.d
+      - geo:/opt/geoip
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+      - TZ=${TZ:-Europe/Moscow}
+    deploy:
+      mode: global
+
+  geoip-cron:
+    image: tkrs/maxmind-geoipupdate
+    volumes:
+      - geo:/data/geo
+    environment:
+      ACCOUNT_ID: 213370
+      LICENSE_KEY: vA1YAIgyGve9Mxaj
+      GEOIP_DB_DIR: /data/geo
+      SCHEDULE: 59 4 * * 3
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.main == true
