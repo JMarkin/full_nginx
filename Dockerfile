@@ -12,6 +12,7 @@ ARG LIBMAXMINDDB_VER=1.4.3
 ARG GEOIP2_VER=3.3
 ARG NGX_BROTLI_VER=v1.0.0rc
 
+
 RUN mkdir -p /usr/local/src/nginx/modules && \
     apt-get update && \
     apt-get install -y --no-install-recommends build-essential ca-certificates wget curl libpcre3 libpcre3-dev autoconf unzip automake libtool tar git libssl-dev zlib1g-dev uuid-dev lsb-release libxml2-dev libxslt1-dev cmake pkg-config libgd-dev
@@ -78,6 +79,9 @@ RUN git clone --quiet https://github.com/vozlt/nginx-module-vts.git /usr/local/s
 # RTMP
 RUN git clone --quiet https://github.com/sergey-dryabzhinsky/nginx-rtmp-module.git /usr/local/src/nginx/modules/nginx-rtmp-module
 
+# DAV EXT
+RUN git clone --quiet https://github.com/arut/nginx-dav-ext-module.git /usr/local/src/nginx/modules/nginx-dav-ext-module
+
 RUN mkdir -p /etc/nginx
 
 ENV NGINX_OPTIONS="--prefix=/etc/nginx \
@@ -120,6 +124,7 @@ ENV NGINX_MODULES="--with-threads \
     --add-module=/usr/local/src/nginx/modules/lua-nginx-module-${LUA_NGINX_VER} \
     --add-module=/usr/local/src/nginx/modules/fancyindex \
     --add-module=/usr/local/src/nginx/modules/nginx-rtmp-module \
+    --add-module=/usr/local/src/nginx/modules/nginx-dav-ext-module \
     --add-module=/usr/local/src/nginx/modules/nginx-module-vts"
 
 ENV LUAJIT_LIB=/usr/local/lib/
