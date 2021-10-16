@@ -214,8 +214,22 @@ RUN echo "00 22 * * * /usr/local/sbin/update-ngxblocker -c /etc/nginx/botconf.d 
     87.250.255.243    0; \n " > /etc/nginx/bots.d/whitelist-ips.conf
 
 COPY /default.conf /etc/nginx/sites-enabled/default.conf
-
 COPY /notify.sh /notify.sh
 COPY /run.sh /run.sh
-RUN chmod +x /run.sh && chmod +x /notify.sh
+
 CMD /run.sh
+
+RUN groupadd -r nginx -g 1000 &&\
+    useradd -u 1000 -r -g nginx -d /home/app -s /sbin/nologin -c "NGINX user" nginx
+
+RUN chown -R nginx:nginx /var/cache/nginx && \
+    chown -R nginx:nginx /var/log/nginx && \
+    chown -R nginx:nginx /etc/nginx && \
+    touch /run/nginx.pid && \
+    chown -R nginx:nginx /run/nginx.pid && \
+    chmod +x /run.sh && chmod +x /notify.sh && \
+    chown nginx:nginx /run.sh && \
+    chown nginx:nginx /notify.sh
+
+## switch to non-root user
+USER nginx

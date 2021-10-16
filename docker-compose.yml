@@ -19,10 +19,9 @@ services:
         protocol: tcp
         mode: host
     volumes:
-      - ${NGINX_PATH:-/srv/nginx}:/etc/nginx/conf.d
+      - /var/log/nginx:/var/log/nginx
       - geo:/opt/geoip
-      - /etc/timezone:/etc/timezone:ro
-      - /etc/localtime:/etc/localtime:ro
+      - /srv/nginx/conf.d:/etc/nginx/conf.d
     environment:
       - TZ=${TZ:-Europe/Moscow}
     deploy:
