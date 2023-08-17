@@ -1,8 +1,5 @@
 version: "3.7"
 
-volumes:
-  geo:
-
 services:
   nginx:
     image: jmarkin/full_nginx:${VERSION:-latest}
@@ -18,26 +15,6 @@ services:
         published: 443
         protocol: tcp
         mode: host
-    volumes:
-      - /var/log/nginx:/var/log/nginx
-      - geo:/opt/geoip
-      - /srv/nginx/conf.d:/etc/nginx/conf.d
     environment:
       - TZ=${TZ:-Europe/Moscow}
-    deploy:
-      mode: global
 
-  geoip-cron:
-    image: tkrs/maxmind-geoipupdate
-    volumes:
-      - geo:/data/geo
-    environment:
-      ACCOUNT_ID: 213370
-      LICENSE_KEY: vA1YAIgyGve9Mxaj
-      GEOIP_DB_DIR: /data/geo
-      SCHEDULE: 59 4 * * 3
-    deploy:
-      replicas: 1
-      placement:
-        constraints:
-          - node.labels.main == true
