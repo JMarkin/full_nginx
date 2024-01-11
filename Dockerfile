@@ -1,6 +1,12 @@
+FROM alpine:latest AS caps
+RUN apk add --no-cache build-base git libcap-static libcap-dev
+RUN git clone --depth 1 https://git.kernel.org/pub/scm/libs/libcap/libcap
+RUN gcc --static libcap/progs/setcap.c -o /bin/setcap -lcap
+
+
 FROM debian:stable as builder
 
-ARG NGINX_VER=1.25.2
+ARG NGINX_VER=1.25.3
 ARG OPENSSL_VER=3.1.2
 ARG HEADERMOD_VER=0.34
 ARG LIBMAXMINDDB_VER=1.7.1
@@ -148,12 +154,16 @@ RUN chown -R nginx:nginx /var/cache/nginx && \
     chown -R nginx:nginx /var/log/nginx && \
     chown -R nginx:nginx /etc/nginx && \
     chown -R nginx:nginx /opt/geoip && \
-    touch /run/nginx.pid && \
-    chown -R nginx:nginx /run/nginx.pid && \
+    touch /tmp/nginx.pid && \
+    chown -R nginx:nginx /tmp/nginx.pid && \
     chmod +x /run.sh && \
     chmod +x /notify.sh && \
     chmod +x /usr/local/sbin/download_geo && \
     chown -R nginx:nginx /var/log/nginx
+
+COPY --from=caps /bin/setcap /bin
+
+RUN setcap 'cap_net_bind_service=+ep' /usr/sbin/nginx
 
 USER nginx
 
